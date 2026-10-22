@@ -35,7 +35,14 @@ builder.Services.AddScoped<CartPriceCalculator>();
 
 // В демо-режиме письма «уходят» в лог (TestEmailSender); для реальной SMTP-отправки
 // заменить регистрацию на EmailSender.
-builder.Services.AddScoped<IEmailSender, TestEmailSender>();
+builder.Services.AddKeyedScoped<IEmailSender>("primary", (sp, _) => new TestEmailSender(
+    sp.GetRequiredService<ILogger<TestEmailSender>>(),
+    simulateFailure: true));
+
+builder.Services.AddKeyedScoped<IEmailSender>("backup", (sp, _) => new TestEmailSender(
+    sp.GetRequiredService<ILogger<TestEmailSender>>(),
+    simulateFailure: false));
+
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<FallbackEmailOptions>(builder.Configuration.GetSection("FallbackEmail"));
 builder.Services.AddScoped<LeadService>();

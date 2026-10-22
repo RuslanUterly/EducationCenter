@@ -6,7 +6,8 @@ using Microsoft.Extensions.Options;
 namespace EducationCenter.Api.Services.Leads;
 
 public sealed class LeadService(
-    IEmailSender emailSender,
+    [FromKeyedServices("primary")] IEmailSender primaryEmailSender,
+    [FromKeyedServices("backup")] IEmailSender backupEmailSender,
     IOptions<FallbackEmailOptions> emailOptions,
     ILogger<LeadService> logger)
 {
@@ -16,8 +17,7 @@ public sealed class LeadService(
 
         try
         {
-            throw new Exception("Имитируем ошибку отправки почты");
-            await emailSender.SendAsync(CreateMessage(options.PrimaryRecipient, request), cancellationToken);
+            await primaryEmailSender.SendAsync(CreateMessage(options.PrimaryRecipient, request), cancellationToken);
         }
         catch (Exception ex)
         {
@@ -30,7 +30,7 @@ public sealed class LeadService(
                 "Основной почтовый сервис недоступен. Заявка ({ClientType}) переправлена на резервный адрес {FallbackRecipient}",
                 request.ClientType, fallbackRecipient);
 
-            await emailSender.SendAsync(CreateMessage(fallbackRecipient, request), cancellationToken);
+            await backupEmailSender.SendAsync(CreateMessage(fallbackRecipient, request), cancellationToken);
         }
 
         return new(

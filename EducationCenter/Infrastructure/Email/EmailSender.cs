@@ -14,14 +14,19 @@ public interface IEmailSender
 
 public class TestEmailSender : IEmailSender
 {
-    private readonly ILogger<TestEmailSender> logger;
-    public TestEmailSender(ILogger<TestEmailSender> logger)
+    private readonly bool _simulateFailure;
+    private readonly ILogger<TestEmailSender> _logger;
+    public TestEmailSender(ILogger<TestEmailSender> logger, bool simulateFailure)
     {
-        this.logger = logger;
+        _simulateFailure = simulateFailure;
+        _logger = logger;
     }
     public Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Письмо отправлено на {ToEmail} с темой {Subject} и телом {HtmlBody}", message.To, message.Subject, message.Body);
+        if (_simulateFailure)
+            throw new Exception("Имитируем ошибку отправки почты");
+
+        _logger.LogInformation("Письмо отправлено на {ToEmail} с темой {Subject} и телом {HtmlBody}", message.To, message.Subject, message.Body);
         return Task.CompletedTask;
     }
 }
