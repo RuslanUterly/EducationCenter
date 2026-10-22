@@ -22,6 +22,9 @@ public sealed class CartPriceCalculator(IEnumerable<IDiscountPolicy> discountPol
             var finalPrice = Math.Round(course.Price * (1 - discount), 2, MidpointRounding.AwayFromZero);
 
             items.Add(new CoursePriceItem(course.Id, course.Name, course.Price, discount, finalPrice));
+
+            totalOriginal += course.Price;
+            totalFinal += finalPrice;
         }
 
         return new CartCalculationResponse(items, totalOriginal, totalFinal);
