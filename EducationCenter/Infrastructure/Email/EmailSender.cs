@@ -12,6 +12,9 @@ public interface IEmailSender
     Task SendAsync(EmailMessage message, CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Реализация отправки сообщения по почте для покрытия тестового сбоя
+/// </summary>
 public class TestEmailSender : IEmailSender
 {
     private readonly bool _simulateFailure;
@@ -31,6 +34,9 @@ public class TestEmailSender : IEmailSender
     }
 }
 
+/// <summary>
+/// Продовая реализация отправки сообщения по почте
+/// </summary>
 public class EmailSender(
     IOptions<EmailOptions> options,
     ILogger<EmailSender> logger) : IEmailSender
